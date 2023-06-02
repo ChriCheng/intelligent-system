@@ -1,7 +1,12 @@
-from PRbase import ProductionRule
+from PRbase import *
 from PyQt6 import QtCore, QtGui, QtWidgets
-
-from AddFactWindow import *
+from PyQt6.QtCore import QStringListModel
+from EditFactWindow import *
+from RuleManage import *
+from AddRule import *
+from Reult import *
+from Info import *
+from Rule import *
 
 
 class MainWindow(object):
@@ -25,7 +30,7 @@ class MainWindow(object):
         self.pushButton_2 = QtWidgets.QPushButton(parent=Form)
         self.pushButton_2.setObjectName("pushButton_2")
         self.gridLayout.addWidget(self.pushButton_2, 9, 1, 1, 1)
-        self.Chosen = QtWidgets.QColumnView(parent=Form)
+        self.Chosen = QtWidgets.QListView(parent=Form)
         sizePolicy = QtWidgets.QSizePolicy(
             QtWidgets.QSizePolicy.Policy.Expanding,
             QtWidgets.QSizePolicy.Policy.Expanding,
@@ -36,7 +41,7 @@ class MainWindow(object):
         self.Chosen.setSizePolicy(sizePolicy)
         self.Chosen.setObjectName("Chosen")
         self.gridLayout.addWidget(self.Chosen, 2, 1, 1, 1)
-        self.Fact = QtWidgets.QColumnView(parent=Form)
+        self.Fact = QtWidgets.QListView(parent=Form)
         self.Fact.setObjectName("Fact")
         self.gridLayout.addWidget(self.Fact, 2, 0, 1, 1)
         self.pushButton = QtWidgets.QPushButton(parent=Form)
@@ -63,26 +68,51 @@ class MainWindow(object):
         self.pushButton_4.setObjectName("pushButton_4")
         self.gridLayout.addWidget(self.pushButton_4, 3, 1, 1, 1)
         self.horizontalLayout.addLayout(self.gridLayout)
-        # 增加事实
+        self.FactList = []
+        # 编辑事实
         self.pushButton_3.clicked.connect(self.Open_1)
+        # 管理规则
+        self.pushButton.clicked.connect(self.Open_2)
+        # 开始推理
+        self.pushButton_2.clicked.connect(self.Open_3)
 
         self.retranslateUi(Form)
         QtCore.QMetaObject.connectSlotsByName(Form)
 
-    def Open_1(self):
-        self.form2 = QtWidgets.QWidget()
-        self.ui2 = FactWindow()  # Ui_form为你副窗口的对象名
+    def Open_3(self):
+        self.form3 = QtWidgets.QDialog()
+        self.ui3 = Result()
+        self.ui3.setupUi(self.form3)
+        self.ui3.exec()
+
+    def Open_2(self):
+        self.form2 = QtWidgets.QDialog()
+        self.ui2 = Rule()
         self.ui2.setupUi(self.form2)
         self.ui2.exec()
 
+    def Open_1(self):
+        self.form1 = QtWidgets.QDialog()
+        self.ui1 = FactWindow()
+        self.ui1.setupUi(self.form1)
+        self.ui1.set_fact_list(self.FactList)
+        self.ui1.factSubmitted.connect(self.factSubmittedHandler)  # 连接信号和槽函数
+        self.form1.exec()
+
+    def factSubmittedHandler(self, facts):
+        self.FactList = facts
+        slm = QStringListModel()
+        slm.setStringList(facts)
+        self.Fact.setModel(slm)
+
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
-        Form.setWindowTitle(_translate("Form", "Form"))
+        Form.setWindowTitle(_translate("Form", "Main"))
         self.label_2.setText(_translate("Form", "已选事实"))
         self.label.setText(_translate("Form", "已有事实"))
         self.pushButton_2.setText(_translate("Form", "开始推理"))
         self.pushButton.setText(_translate("Form", "管理规则"))
-        self.pushButton_3.setText(_translate("Form", "增加事实"))
+        self.pushButton_3.setText(_translate("Form", "编辑事实"))
         self.pushButton_4.setText(_translate("Form", "选择事实"))
 
 
