@@ -1,9 +1,9 @@
 from PRbase import *
 from PyQt6 import QtCore, QtGui, QtWidgets
+from PyQt6.QtWidgets import QApplication, QMainWindow
 from PyQt6.QtCore import QStringListModel
 from EditFactWindow import *
-from RuleManage import *
-from AddRule import *
+from EditRule import *
 from Reult import *
 from Info import *
 from Rule import *
@@ -13,6 +13,9 @@ class MainWindow(object):
     def setupUi(self, Form):
         Form.setObjectName("Main")
         Form.resize(500, 400)
+        self.FactList = self.loadFromFile("save/factlist.txt")
+        self.Rlist = self.loadFromFile("save/Rlist.txt")
+        self.Plist = self.loadFromFile("save/Plist.txt")
         self.horizontalLayout = QtWidgets.QHBoxLayout(Form)
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.gridLayout = QtWidgets.QGridLayout()
@@ -29,7 +32,8 @@ class MainWindow(object):
         )
         self.pushButton_2 = QtWidgets.QPushButton(parent=Form)
         self.pushButton_2.setObjectName("pushButton_2")
-        self.gridLayout.addWidget(self.pushButton_2, 9, 1, 1, 1)
+        self.pushButton_5 = QtWidgets.QPushButton(parent=Form)
+
         self.Chosen = QtWidgets.QListView(parent=Form)
         sizePolicy = QtWidgets.QSizePolicy(
             QtWidgets.QSizePolicy.Policy.Expanding,
@@ -46,7 +50,9 @@ class MainWindow(object):
         self.gridLayout.addWidget(self.Fact, 2, 0, 1, 1)
         self.pushButton = QtWidgets.QPushButton(parent=Form)
         self.pushButton.setObjectName("pushButton")
+        self.pushButton_5.setObjectName("pushButton_5")
         self.gridLayout.addWidget(self.pushButton, 9, 0, 1, 1)
+        self.gridLayout.addWidget(self.pushButton_5, 9, 1, 1, 1)
         self.pushButton_3 = QtWidgets.QPushButton(parent=Form)
         sizePolicy = QtWidgets.QSizePolicy(
             QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Ignored
@@ -68,28 +74,108 @@ class MainWindow(object):
         self.pushButton_4.setObjectName("pushButton_4")
         self.gridLayout.addWidget(self.pushButton_4, 3, 1, 1, 1)
         self.horizontalLayout.addLayout(self.gridLayout)
-        self.FactList = []
+        # 交换
+        total_rows = self.gridLayout.rowCount()
+        print(total_rows)
+        self.gridLayout.addWidget(self.pushButton_2, total_rows, 0, 1, 2)
+
+        self.pushButton_5.clicked.connect(self.ClearChosenList)
+        # 显示内容
+        slm = QStringListModel()
+        slm.setStringList(self.FactList)
+        self.Fact.setModel(slm)
+
+        self.Fact.setEditTriggers(
+            QtWidgets.QAbstractItemView.EditTrigger.NoEditTriggers
+        )
+        self.Chosen.setEditTriggers(
+            QtWidgets.QAbstractItemView.EditTrigger.NoEditTriggers
+        )
+        # 选择列表
+        self.ChosenList = []
+
         # 编辑事实
         self.pushButton_3.clicked.connect(self.Open_1)
         # 管理规则
         self.pushButton.clicked.connect(self.Open_2)
         # 开始推理
         self.pushButton_2.clicked.connect(self.Open_3)
+        # 选择事实
+        self.pushButton_4.clicked.connect(self.CurrentItem)
+        # 清空事实
+        self.pushButton_5.clicked.connect(self.ClearChosenList)
+
+        Form.closeEvent = self.closeEvent
 
         self.retranslateUi(Form)
         QtCore.QMetaObject.connectSlotsByName(Form)
+
+    def loadFromFile(self, filename):
+        try:
+            with open(filename, "r") as file:
+                return [line.strip() for line in file]
+        except FileNotFoundError:
+            return []
+
+    def closeEvent(self, even):
+        # 保存FactList中的值到txt文件
+        self.ClearChosenList()
+        self.saveFactListToFile("save/factlist.txt", self.FactList)
+        self.saveFactListToFile("save/Plist.txt", self.Plist)
+        self.saveFactListToFile("save/Rlist.txt", self.Rlist)
+
+    def saveFactListToFile(self, filename, List):
+        with open(filename, "r+") as file:
+            file.truncate(0)
+        with open(filename, "w") as file:
+            for fact in List:
+                file.write(fact + "\n")
+
+    def ClearChosenList(self):
+        self.FactList = self.FactList + self.ChosenList
+        self.ChosenList.clear()
+        chose = QStringListModel(self.ChosenList)
+        self.Chosen.setModel(chose)
+
+        fact = QStringListModel(self.FactList)
+        self.Fact.setModel(fact)
+
+    def CurrentItem(self):
+        indexes = self.Fact.selectedIndexes()
+        if not indexes:
+            return
+        item = indexes[0].data()
+        self.ChosenList.append(item)
+        slm = QStringListModel()
+        slm.setStringList(self.ChosenList)
+        self.Chosen.setModel(slm)
+        self.FactList.remove(item)
+        fact_model = QStringListModel(self.FactList)
+        self.Fact.setModel(fact_model)
 
     def Open_3(self):
         self.form3 = QtWidgets.QDialog()
         self.ui3 = Result()
         self.ui3.setupUi(self.form3)
-        self.ui3.exec()
+        self.ui3.setlist(self.Plist, self.Rlist, self.ChosenList)
+        self.form3.show()
 
     def Open_2(self):
         self.form2 = QtWidgets.QDialog()
         self.ui2 = Rule()
         self.ui2.setupUi(self.form2)
-        self.ui2.exec()
+        self.ui2.setlist(self.Plist, self.Rlist)
+        self.ui2.RuleToMain.connect(self.ruleClosedHandler)  # 连接Rule窗口的ruleClosed信号
+        self.form2.show()
+
+    def ruleClosedHandler(self, Plist, Rlist):
+        self.Plist = Plist
+        self.Rlist = Rlist
+        # 在这里接收Plist和Rlist，进行后续操作
+        # rule_list = [f"{Plist[i]} > {Rlist[i]}" for i in range(len(Plist))]
+        # print("Received Plist:", Plist)
+        # print("Received Rlist:", Rlist)
+        # print("Rule list:", rule_list)
 
     def Open_1(self):
         self.form1 = QtWidgets.QDialog()
@@ -114,6 +200,7 @@ class MainWindow(object):
         self.pushButton.setText(_translate("Form", "管理规则"))
         self.pushButton_3.setText(_translate("Form", "编辑事实"))
         self.pushButton_4.setText(_translate("Form", "选择事实"))
+        self.pushButton_5.setText(_translate("Form", "清空已选事实"))
 
 
 if __name__ == "__main__":

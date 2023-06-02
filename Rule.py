@@ -1,10 +1,13 @@
 from PyQt6 import QtCore, QtGui, QtWidgets
+from PyQt6.QtCore import QStringListModel
 
 
 class Rule(QtWidgets.QDialog):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
+
+    RuleToMain = QtCore.pyqtSignal(list, list)  # 传到主窗口
 
     def setupUi(self, Dialog):
         Dialog.setObjectName("Rule")
@@ -30,21 +33,57 @@ class Rule(QtWidgets.QDialog):
         self.pushButton = QtWidgets.QPushButton(parent=Dialog)
         self.pushButton.setObjectName("pushButton")
         self.verticalLayout_3.addWidget(self.pushButton)
+        self.RuleList = []
+        self.listView.setEditTriggers(
+            QtWidgets.QAbstractItemView.EditTrigger.NoEditTriggers
+        )
+        # 编辑规则
+        self.pushButton.clicked.connect(self.Open_1)
 
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
 
+    def Open_1(self):
+        import EditRule
+
+        self.form1 = QtWidgets.QDialog()
+        self.ui1 = EditRule.EditRule()
+        self.ui1.setupUi(self.form1)
+        self.RuleList = [
+            f"{self.Plist[i]} > {self.Rlist[i]}" for i in range(len(self.Plist))
+        ]
+        self.ui1.set_rule_list(self.RuleList)
+        self.ui1.ruleSubmitted.connect(self.ruleSubmittedHandler)  # 连接信号和槽函数
+        self.form1.exec()
+
+    def ruleSubmittedHandler(self, Plist, Rlist):
+        self.Plist = Plist
+        self.Rlist = Rlist
+
+        # 创建包含Plist和Rlist的字符串列表
+        rule_list = [f"{Plist[i]} > {Rlist[i]}" for i in range(len(Plist))]
+        self.RuleToMain.emit(self.Plist, self.Rlist)
+        # 更新界面显示
+        slm = QStringListModel()
+        slm.setStringList(rule_list)  # 将rule_list设置为字符串列表模型的数据源
+        self.listView.setModel(slm)  # 在listView中显示rule_list的内容
+
     def retranslateUi(self, Dialog):
         _translate = QtCore.QCoreApplication.translate
-        Dialog.setWindowTitle(_translate("Dialog", "Dialog"))
-        self.label_3.setText(_translate("Dialog", "规则格式"))
-        self.label_4.setText(
-            _translate(
-                "Dialog",
-                "前提1 | … | 前提n > 结论( | 表示“或) \n" "前提1 & … & 前提n > 结论( & 表示“与”)\n" " ",
-            )
-        )
+        Dialog.setWindowTitle(_translate("Dialog", "Rule"))
+        self.label_3.setText(_translate("Dialog", "已有规则"))
+
         self.pushButton.setText(_translate("Dialog", "修改规则"))
+
+    def setlist(self, Plist, Rlist):
+        self.Plist = Plist
+        self.Rlist = Rlist
+        rule_list = [f"{Plist[i]} > {Rlist[i]}" for i in range(len(Plist))]
+        self.RuleToMain.emit(self.Plist, self.Rlist)
+        # 更新界面显示
+        slm = QStringListModel()
+        slm.setStringList(rule_list)  # 将rule_list设置为字符串列表模型的数据源
+        self.listView.setModel(slm)  # 在listView中显示rule_list的内容
 
 
 if __name__ == "__main__":
@@ -56,3 +95,6 @@ if __name__ == "__main__":
     ui.setupUi(Dialog)
     Dialog.show()
     sys.exit(app.exec())
+
+# A | B > C
+# K & O > P
