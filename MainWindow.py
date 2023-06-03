@@ -63,21 +63,12 @@ class MainWindow(object):
         self.pushButton_3.setSizePolicy(sizePolicy)
         self.pushButton_3.setObjectName("pushButton_3")
         self.gridLayout.addWidget(self.pushButton_3, 3, 0, 1, 1)
-        self.pushButton_4 = QtWidgets.QPushButton(parent=Form)
-        sizePolicy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Maximum
-        )
+
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(30)
-        sizePolicy.setHeightForWidth(self.pushButton_4.sizePolicy().hasHeightForWidth())
-        self.pushButton_4.setSizePolicy(sizePolicy)
-        self.pushButton_4.setObjectName("pushButton_4")
-        self.gridLayout.addWidget(self.pushButton_4, 3, 1, 1, 1)
+
+        self.gridLayout.addWidget(self.pushButton_2, 3, 1, 1, 1)
         self.horizontalLayout.addLayout(self.gridLayout)
-        # 交换
-        total_rows = self.gridLayout.rowCount()
-        print(total_rows)
-        self.gridLayout.addWidget(self.pushButton_2, total_rows, 0, 1, 2)
 
         self.pushButton_5.clicked.connect(self.ClearChosenList)
         # 显示内容
@@ -100,15 +91,29 @@ class MainWindow(object):
         self.pushButton.clicked.connect(self.Open_2)
         # 开始推理
         self.pushButton_2.clicked.connect(self.Open_3)
-        # 选择事实
-        self.pushButton_4.clicked.connect(self.CurrentItem)
         # 清空事实
         self.pushButton_5.clicked.connect(self.ClearChosenList)
-
+        # 存储
         Form.closeEvent = self.closeEvent
-
+        # 双击选择：
+        self.Fact.doubleClicked.connect(self.CurrentItem)
+        # 双击选择
+        self.Chosen.doubleClicked.connect(self.retruntofact)
         self.retranslateUi(Form)
         QtCore.QMetaObject.connectSlotsByName(Form)
+
+    def retruntofact(self):
+        indexes = self.Chosen.selectedIndexes()
+        if not indexes:
+            return
+        item = indexes[0].data()
+        self.FactList.append(item)
+        slm = QStringListModel()
+        slm.setStringList(self.FactList)
+        self.Fact.setModel(slm)
+        self.ChosenList.remove(item)
+        model = QStringListModel(self.ChosenList)
+        self.Chosen.setModel(model)
 
     def loadFromFile(self, filename):
         try:
@@ -165,17 +170,16 @@ class MainWindow(object):
         self.ui2 = Rule()
         self.ui2.setupUi(self.form2)
         self.ui2.setlist(self.Plist, self.Rlist)
-        self.ui2.RuleToMain.connect(self.ruleClosedHandler)  # 连接Rule窗口的ruleClosed信号
+        self.ui2.RuleToMain.connect(self.ruleClosedHandler)
         self.form2.show()
 
     def ruleClosedHandler(self, Plist, Rlist):
         self.Plist = Plist
         self.Rlist = Rlist
-        # 在这里接收Plist和Rlist，进行后续操作
-        # rule_list = [f"{Plist[i]} > {Rlist[i]}" for i in range(len(Plist))]
-        # print("Received Plist:", Plist)
-        # print("Received Rlist:", Rlist)
-        # print("Rule list:", rule_list)
+        rule_list = [f"{Plist[i]} > {Rlist[i]}" for i in range(len(Plist))]
+        print("Received Plist:", Plist)
+        print("Received Rlist:", Rlist)
+        print("Rule list:", rule_list)
 
     def Open_1(self):
         self.form1 = QtWidgets.QDialog()
@@ -199,7 +203,6 @@ class MainWindow(object):
         self.pushButton_2.setText(_translate("Form", "开始推理"))
         self.pushButton.setText(_translate("Form", "管理规则"))
         self.pushButton_3.setText(_translate("Form", "编辑事实"))
-        self.pushButton_4.setText(_translate("Form", "选择事实"))
         self.pushButton_5.setText(_translate("Form", "清空已选事实"))
 
 

@@ -59,7 +59,6 @@ class Rule(QtWidgets.QDialog):
     def ruleSubmittedHandler(self, Plist, Rlist):
         self.Plist = Plist
         self.Rlist = Rlist
-
         # 创建包含Plist和Rlist的字符串列表
         rule_list = [f"{Plist[i]} > {Rlist[i]}" for i in range(len(Plist))]
         self.RuleToMain.emit(self.Plist, self.Rlist)
@@ -95,6 +94,3 @@ if __name__ == "__main__":
     ui.setupUi(Dialog)
     Dialog.show()
     sys.exit(app.exec())
-
-# A | B > C
-# K & O > P
