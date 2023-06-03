@@ -51,7 +51,7 @@ class FactWindow(QtWidgets.QDialog):
 
     def retranslateUi(self, Dialog):
         _translate = QtCore.QCoreApplication.translate
-        Dialog.setWindowTitle(_translate("AddFact", "AddFact"))  # 设置对话框标题
+        Dialog.setWindowTitle(_translate("EditFact", "EditFact"))  # 设置对话框标题
         self.label.setText(_translate("Add", "请对内容进行编辑"))
 
         self.pushButton.setText(_translate("Add", "确定"))

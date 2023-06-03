@@ -1,38 +1,6 @@
 from PyQt6 import QtCore, QtGui, QtWidgets
 
 
-def match(rule):
-    # 检查规则的前提条件和结论是否符合指定的格式
-    # 返回布尔值，表示规则格式是否正确
-
-    # 检查规则是否为空
-    if not rule:
-        print("规则不能为空")
-        return False
-
-    # 检查规则是否包含前提条件和结论分隔符
-    if ">" not in rule:
-        print("规则格式错误：缺少结论分隔符 '>'")
-        return False
-
-    # 拆分规则为前提条件和结论
-    premises, conclusion = rule.split(">")
-
-    # 检查前提条件是否为空
-    premises = premises.strip()
-    if not premises:
-        print("规则格式错误：缺少前提条件")
-        return False
-
-    # 检查结论是否为空
-    conclusion = conclusion.strip()
-    if not conclusion:
-        print("规则格式错误：缺少结论")
-        return False
-
-    return True
-
-
 class EditRule(QtWidgets.QDialog):
     ruleSubmitted = QtCore.pyqtSignal(list, list)  # 返回列表
 
@@ -40,6 +8,46 @@ class EditRule(QtWidgets.QDialog):
         super().__init__()
 
         self.setupUi(self)
+
+    def match(self, rule):
+        # 检查规则的前提条件和结论是否符合指定的格式
+        # 返回布尔值，表示规则格式是否正确
+
+        # 检查规则是否为空
+        if not rule:
+            self.Open_1("规则不能为空")
+            return False
+
+        # 检查规则是否包含前提条件和结论分隔符
+        if ">" not in rule:
+            self.Open_1("规则格式错误：缺少结论分隔符 '>'")
+            return False
+
+        # 拆分规则为前提条件和结论
+        premises, conclusion = rule.split(">")
+
+        # 检查前提条件是否为空
+        premises = premises.strip()
+        if not premises:
+            self.Open_1("规则格式错误：缺少前提条件")
+            return False
+
+        # 检查结论是否为空
+        conclusion = conclusion.strip()
+        if not conclusion:
+            self.Open_1("规则格式错误：缺少结论")
+            return False
+
+        return True
+
+    def Open_1(self, exec):
+        import Info
+
+        self.form1 = QtWidgets.QDialog()
+        self.ui1 = Info.Info()
+        self.ui1.setupUi(self.form1)
+        self.ui1.setInfo(exec)
+        self.form1.exec()
 
     def setupUi(self, Dialog):
         Dialog.setObjectName("Dialog")
@@ -88,7 +96,7 @@ class EditRule(QtWidgets.QDialog):
         Rlist = []  # 存储结论的列表
 
         for rule in rules:
-            if not match(rule):
+            if not self.match(rule):
                 return
             premises, conclusion = rule.split(">")
             premises = premises.strip()
@@ -113,7 +121,7 @@ class EditRule(QtWidgets.QDialog):
 
     def retranslateUi(self, Dialog):
         _translate = QtCore.QCoreApplication.translate
-        Dialog.setWindowTitle(_translate("AddRule", "AddRule"))
+        Dialog.setWindowTitle(_translate("EditRule", "EditRule"))
         self.label.setText(_translate("Dialog", "规则格式"))
         self.label_2.setText(
             _translate(

@@ -24,6 +24,11 @@ class Result(QtWidgets.QDialog):
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
 
+    def retranslateUi(self, Dialog):
+        _translate = QtCore.QCoreApplication.translate
+        Dialog.setWindowTitle(_translate("Dialog", "Result"))
+        self.label.setText(_translate("Dialog", "推理结果"))
+
     def setlist(self, Plist, Rlist, ChosenList):
         self.Plist = Plist
         self.Rlist = Rlist
@@ -31,11 +36,6 @@ class Result(QtWidgets.QDialog):
         self.textEdit.append("- 开始推理 -")
         self.perform_inference()  # 进行推理
         self.textEdit.append("- 推理结束 -")
-
-    def retranslateUi(self, Dialog):
-        _translate = QtCore.QCoreApplication.translate
-        Dialog.setWindowTitle(_translate("Dialog", "Result"))
-        self.label.setText(_translate("Dialog", "推理结果"))
 
     def is_include_in_DB(self, p):
         conditions = p.split(" & ")

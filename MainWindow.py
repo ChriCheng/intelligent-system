@@ -1,4 +1,3 @@
-from PRbase import *
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtWidgets import QApplication, QMainWindow
 from PyQt6.QtCore import QStringListModel
@@ -176,10 +175,10 @@ class MainWindow(object):
     def ruleClosedHandler(self, Plist, Rlist):
         self.Plist = Plist
         self.Rlist = Rlist
-        rule_list = [f"{Plist[i]} > {Rlist[i]}" for i in range(len(Plist))]
-        print("Received Plist:", Plist)
-        print("Received Rlist:", Rlist)
-        print("Rule list:", rule_list)
+        # rule_list = [f"{Plist[i]} > {Rlist[i]}" for i in range(len(Plist))]
+        # print("Received Plist:", Plist)
+        # print("Received Rlist:", Rlist)
+        # print("Rule list:", rule_list)
 
     def Open_1(self):
         self.form1 = QtWidgets.QDialog()

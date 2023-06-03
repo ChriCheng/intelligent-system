@@ -12,16 +12,19 @@ class Info(QtWidgets.QDialog):
         Dialog.resize(400, 300)
         self.verticalLayout = QtWidgets.QVBoxLayout(Dialog)
         self.verticalLayout.setObjectName("verticalLayout")
-        self.columnView = QtWidgets.QColumnView(parent=Dialog)
-        self.columnView.setObjectName("columnView")
-        self.verticalLayout.addWidget(self.columnView)
-
+        self.textEdit = QtWidgets.QTextEdit(parent=Dialog)
+        self.textEdit.setObjectName("textEdit")
+        self.verticalLayout.addWidget(self.textEdit)
+        self.textEdit.setReadOnly(True)
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
 
     def retranslateUi(self, Dialog):
         _translate = QtCore.QCoreApplication.translate
         Dialog.setWindowTitle(_translate("Dialog", "Info"))
+
+    def setInfo(self, str):
+        self.textEdit.append(str)
 
 
 if __name__ == "__main__":
